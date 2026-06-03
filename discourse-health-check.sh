@@ -260,13 +260,13 @@ if container_running; then
         crit "Nginx is NOT running"
     fi
 
-    # ── Puma (web server) ────────────────────────────────
-    if [[ "$(in_container 'pgrep -f puma >/dev/null && echo ok')" == "ok" ]]; then
-        ok "Puma (web) is running"
-        workers=$(in_container "pgrep -c -f 'puma.*cluster worker' || echo 0" | tr -d '\r')
-        info "Puma workers: ${workers}"
+    # ── Unicorn (web server) ─────────────────────────────
+    if [[ "$(in_container 'pgrep -f unicorn >/dev/null && echo ok')" == "ok" ]]; then
+        ok "Unicorn (web) is running"
+        workers=$(in_container "pgrep -c -f 'unicorn worker' || echo 0" | tr -d '\r')
+        info "Unicorn workers: ${workers}"
     else
-        crit "Puma (web) is NOT running"
+        crit "Unicorn (web) is NOT running"
     fi
 
     # ── Sidekiq (background jobs) ────────────────────────
