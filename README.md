@@ -11,6 +11,37 @@ Discourse host.
 
 ![Sample output](docs/screenshot.png)
 
+Text example (showing a run with one warning):
+
+```
+╔══════════════════════════════════════════════════════════╗
+║  Discourse Server Health Check                           ║
+╚══════════════════════════════════════════════════════════╝
+  Host: forum.example.com    Date: 2026-06-03 14:32:09 UTC
+  Discourse path: /var/discourse    Container: app
+
+━━━ SYSTEM UPTIME & LOAD
+  · Uptime: up 3 weeks, 2 days
+  · Load average: 0.05 / 0.07 / 0.07  (6 CPU cores)
+  ✔ CPU load: 1% of capacity
+
+━━━ MEMORY
+  · RAM: 3188MB used / 5927MB total / 1716MB available
+  ✔ Memory utilization: 53%
+  ✔ Swap: 57MB / 1023MB (5%)
+
+  ... (sections for Disk, Network, Docker, Discourse Services,
+       Backups, SSL/TLS, Security) ...
+
+════════════════════════════════════════════════════════════
+
+  Summary    19 passed   1 warnings   0 critical   (20 checks)
+
+  ▸ Warnings found — review items marked ⚠ above
+
+════════════════════════════════════════════════════════════
+```
+
 ## What it checks
 
 **System**
