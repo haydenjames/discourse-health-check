@@ -67,7 +67,7 @@ above 500 attempts in 24 hours.
 **Discourse services (inside the container)**
 - PostgreSQL — readiness, database size, connection pool usage
 - Redis — ping, memory, key count
-- Nginx, Puma (worker count), Sidekiq (queue / retry / scheduled)
+- Nginx, Unicorn (worker count), Sidekiq (queue / retry / scheduled)
 - Discourse version, uploads directory size
 
 **Backups**
