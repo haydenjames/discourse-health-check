@@ -83,12 +83,25 @@ distro with a standalone Discourse container.
 ## Install
 
 ```bash
+curl -O https://raw.githubusercontent.com/haydenjames/discourse-health-check/main/discourse-health-check.sh
+chmod +x discourse-health-check.sh
+```
+
+Then run it: `sudo ./discourse-health-check.sh`
+
+### Optional: install system-wide
+
+If you'd rather run it as a command from anywhere:
+
+```bash
 sudo curl -fsSL https://raw.githubusercontent.com/haydenjames/discourse-health-check/main/discourse-health-check.sh \
   -o /usr/local/bin/discourse-health-check
 sudo chmod +x /usr/local/bin/discourse-health-check
 ```
 
-Or clone the repo:
+Then run it: `sudo discourse-health-check`
+
+### Or clone the repo
 
 ```bash
 git clone https://github.com/haydenjames/discourse-health-check.git
