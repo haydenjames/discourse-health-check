@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-06-03
+
+### Fixed
+- Web server check now looks for Unicorn (Discourse's actual web server) instead of Puma. The previous loose `pgrep -f puma` was producing false positives.
+
 ## [1.0.0] - 2026-06-03
 
 ### Added
