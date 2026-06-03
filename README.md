@@ -83,7 +83,7 @@ distro with a standalone Discourse container.
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/haydenjames/discourse-health-check/main/discourse-health-check.sh \
+sudo curl -fsSL https://raw.githubusercontent.com/haydenjames/discourse-health-check/main/discourse-health-check.sh \
   -o /usr/local/bin/discourse-health-check
 sudo chmod +x /usr/local/bin/discourse-health-check
 ```
