@@ -170,22 +170,31 @@ if command -v ss &>/dev/null; then
     info "TCP connections — established: ${estab}  time-wait: ${tw}"
 fi
 
-http_status=""
-for url in http://localhost https://localhost; do
-    resp=$(curl -sI --max-time 5 -k "$url" 2>/dev/null | head -1 | tr -d '\r')
-    if [[ -n "$resp" ]]; then
-        http_status="$resp"
-        break
-    fi
-done
+http_headers=$(curl -sI --max-time 5 http://localhost 2>/dev/null)
+http_status=$(echo "$http_headers" | head -1 | tr -d '\r')
+http_location=$(echo "$http_headers" | grep -i '^location:' | head -1 | tr -d '\r' | awk '{print $2}')
+
 if [[ -n "$http_status" ]]; then
-    if [[ "$http_status" == *"200"* || "$http_status" == *"301"* || "$http_status" == *"302"* ]]; then
-        ok "Local HTTP response: ${http_status}"
-    else
-        warn "Local HTTP response: ${http_status}"
-    fi
+    case "$http_status" in
+        *301*|*302*)
+            if [[ "$http_location" == https://* ]]; then
+                ok "HTTP → HTTPS redirect working (${http_status})"
+            else
+                warn "HTTP redirect (${http_status}) but not to HTTPS: ${http_location}"
+            fi ;;
+        *200*)
+            warn "HTTP returns 200 on port 80 — HTTPS not being enforced" ;;
+        *)
+            warn "Local HTTP response: ${http_status}" ;;
+    esac
 else
-    warn "No HTTP response on localhost"
+    # Try HTTPS directly if HTTP didn't answer at all
+    https_status=$(curl -sI --max-time 5 -k https://localhost 2>/dev/null | head -1 | tr -d '\r')
+    if [[ -n "$https_status" ]]; then
+        ok "Local HTTPS response: ${https_status}"
+    else
+        warn "No HTTP/HTTPS response on localhost"
+    fi
 fi
 
 # ═════════════════════════════════════════════════════════

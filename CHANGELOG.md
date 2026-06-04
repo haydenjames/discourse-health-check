@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3] - 2026-06-04
+
+### Changed
+- Network section now interprets the HTTP → HTTPS redirect instead of showing the raw `301 Moved Permanently` status line, which read as a problem. Now shows "HTTP → HTTPS redirect working" when port 80 redirects to an `https://` location, or warns if port 80 returns 200 (HTTPS not enforced).
+
 ## [1.0.2] - 2026-06-04
 
 ### Added
