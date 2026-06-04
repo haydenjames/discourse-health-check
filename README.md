@@ -73,6 +73,7 @@ above 500 attempts in 24 hours.
 **Backups**
 - Newest backup file, age, size, total backup count
 - Warns at 7 days, critical at 14 days
+- Offsite-copy check: compares atime vs mtime on the latest backup to detect whether it's been picked up by rsync / rclone / S3 sync / etc. (skipped on `noatime` mounts)
 
 **SSL / TLS**
 - Live cert served on `:443` (what visitors actually see)

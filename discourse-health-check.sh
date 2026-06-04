@@ -322,6 +322,27 @@ for bdir in \
     else                            crit "Latest backup: ${backup_date} (${days_ago}d ago, ${backup_size})"
     fi
     info "Backup count: ${backup_count} files in ${bdir}"
+
+    # Offsite-copy proxy: compare atime vs mtime on the latest backup.
+    # If the file was read after it was written, something (rsync, rclone,
+    # S3 sync, etc.) likely picked it up for offsite storage.
+    mount_opts=$(findmnt -no OPTIONS --target "$latest" 2>/dev/null)
+    if [[ "$mount_opts" == *"noatime"* ]]; then
+        info "Offsite check skipped (filesystem mounted with noatime)"
+    else
+        atime=$(stat -c %X "$latest" 2>/dev/null)
+        mtime=$(stat -c %Y "$latest" 2>/dev/null)
+        if [[ -n "$atime" && -n "$mtime" ]]; then
+            if (( atime > mtime )); then
+                read_days_ago=$(( ($(date +%s) - atime) / 86400 ))
+                if   (( read_days_ago <= 7 )); then ok "Latest backup was read ${read_days_ago}d ago — likely copied offsite"
+                else                                warn "Latest backup last read ${read_days_ago}d ago — offsite copy may be stale"
+                fi
+            else
+                warn "Latest backup has never been read since written — not copied offsite?"
+            fi
+        fi
+    fi
     break
 done
 $backup_found || warn "No backup files found"
