@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [1.0.2] - 2026-06-04
 
 ### Added
-- Offsite-backup proxy check: compares atime vs mtime on the latest backup to flag whether it appears to have been copied offsite. Skipped on `noatime` mounts.
+- Offsite-backup proxy check: compares atime vs mtime on the latest backup to flag whether it appears to have been copied offsite. Skipped on `noatime` mounts. Suggested by [@ed_s on Discourse Meta](https://meta.discourse.org/u/ed_s).
 
 ## [1.0.1] - 2026-06-03
 
