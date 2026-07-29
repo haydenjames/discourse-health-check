@@ -281,10 +281,15 @@ if container_running; then
     # Unicorn entirely in 2026.4. config/unicorn_launcher was kept for the
     # Docker images, so a bare "unicorn" match can still hit the launcher on
     # a Pitchfork install — check Pitchfork first, and verify worker count.
-    web_proc=$(in_container "pgrep -f pitchfork >/dev/null && echo pitchfork || { pgrep -f unicorn >/dev/null && echo unicorn; }" | tr -d '\r')
+    #
+    # Patterns bracket their first character ("[p]itchfork") so pgrep cannot
+    # match the command line of its own `docker exec sh -c` wrapper, which
+    # would otherwise report the server as running no matter what.
+    web_proc=$(in_container "pgrep -f '[p]itchfork' >/dev/null && echo pitchfork || { pgrep -f '[u]nicorn' >/dev/null && echo unicorn; }" | tr -d '\r')
     if [[ -n "$web_proc" ]]; then
         ok "Web server (${web_proc}) is running"
-        workers=$(in_container "pgrep -c -f '${web_proc} worker' || echo 0" | tr -d '\r')
+        web_pat="[${web_proc:0:1}]${web_proc:1}"
+        workers=$(in_container "pgrep -c -f '${web_pat} worker' || echo 0" | tr -d '\r')
         info "${web_proc} workers: ${workers}"
         if [[ "$workers" =~ ^[0-9]+$ ]] && (( workers == 0 )); then
             crit "${web_proc} is up but no workers are running"
