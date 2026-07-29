@@ -65,9 +65,9 @@ above 500 attempts in 24 hours.
 - Docker storage footprint
 
 **Discourse services (inside the container)**
-- PostgreSQL — readiness, database size, connection pool usage
+- PostgreSQL — readiness, major version (flags below the required 15), database size, connection pool usage
 - Redis — ping, memory, key count
-- Nginx, Unicorn (worker count), Sidekiq (queue / retry / scheduled)
+- Nginx, web server (Pitchfork or Unicorn, with worker count), Sidekiq (queue / retry / scheduled)
 - Discourse version, uploads directory size
 
 **Backups**

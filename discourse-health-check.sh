@@ -238,6 +238,13 @@ if container_running; then
     # ── PostgreSQL ───────────────────────────────────────
     if [[ "$(in_container 'pg_isready -q && echo ok')" == "ok" ]]; then
         ok "PostgreSQL is accepting connections"
+        pg_ver=$(in_container "cat /shared/postgres_data/PG_VERSION 2>/dev/null" | tr -d '\r' | head -1)
+        if [[ -n "$pg_ver" ]]; then
+            info "PostgreSQL version: ${pg_ver}"
+            if [[ "$pg_ver" =~ ^[0-9]+$ ]] && (( pg_ver < 15 )); then
+                crit "PostgreSQL ${pg_ver} is below the minimum 15 required by Discourse 2026.5+"
+            fi
+        fi
         pg_size=$(in_container "sudo -u postgres psql -At -c \"SELECT pg_size_pretty(pg_database_size('discourse'));\"" || echo "?")
         pg_conns=$(in_container "sudo -u postgres psql -At -c \"SELECT count(*) FROM pg_stat_activity;\"" || echo "?")
         pg_max=$(in_container "sudo -u postgres psql -At -c \"SHOW max_connections;\"" || echo "?")
@@ -269,13 +276,21 @@ if container_running; then
         crit "Nginx is NOT running"
     fi
 
-    # ── Unicorn (web server) ─────────────────────────────
-    if [[ "$(in_container 'pgrep -f unicorn >/dev/null && echo ok')" == "ok" ]]; then
-        ok "Unicorn (web) is running"
-        workers=$(in_container "pgrep -c -f 'unicorn worker' || echo 0" | tr -d '\r')
-        info "Unicorn workers: ${workers}"
+    # ── Web server (Pitchfork / Unicorn) ─────────────────
+    # Discourse switched to Pitchfork by default in 2026.2 and removed
+    # Unicorn entirely in 2026.4. config/unicorn_launcher was kept for the
+    # Docker images, so a bare "unicorn" match can still hit the launcher on
+    # a Pitchfork install — check Pitchfork first, and verify worker count.
+    web_proc=$(in_container "pgrep -f pitchfork >/dev/null && echo pitchfork || { pgrep -f unicorn >/dev/null && echo unicorn; }" | tr -d '\r')
+    if [[ -n "$web_proc" ]]; then
+        ok "Web server (${web_proc}) is running"
+        workers=$(in_container "pgrep -c -f '${web_proc} worker' || echo 0" | tr -d '\r')
+        info "${web_proc} workers: ${workers}"
+        if [[ "$workers" =~ ^[0-9]+$ ]] && (( workers == 0 )); then
+            crit "${web_proc} is up but no workers are running"
+        fi
     else
-        crit "Unicorn (web) is NOT running"
+        crit "Web server (pitchfork/unicorn) is NOT running"
     fi
 
     # ── Sidekiq (background jobs) ────────────────────────

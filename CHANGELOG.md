@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4] - 2026-07-29
+
+### Fixed
+- Web server check now detects Pitchfork as well as Unicorn. Discourse made Pitchfork the default in 2026.2 and removed Unicorn entirely in 2026.4, so the old `pgrep -f unicorn` check reported a false critical on current releases. Pitchfork is matched first, since `config/unicorn_launcher` was kept for the Docker images and can still match a bare "unicorn" pattern on a Pitchfork install.
+
+### Added
+- Web server worker count is now validated — a running master with zero workers is reported as critical instead of passing silently.
+- PostgreSQL major version is reported, and flagged as critical below 15 (the minimum required from Discourse 2026.5 onwards).
+
 ## [1.0.3] - 2026-06-04
 
 ### Changed
