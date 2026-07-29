@@ -5,7 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [1.0.4] - 2026-07-29
 
 ### Fixed
-- Web server check no longer matches its own `docker exec` wrapper. `pgrep -f unicorn` was run inside a shell whose command line contained the word "unicorn", so pgrep matched itself and the check passed whether or not the web server was actually running — the same root cause as the Puma false positive in 1.0.1, which was renamed rather than fixed. Patterns now bracket their first character (`[u]nicorn`) so only real processes match.
+- Web server and Sidekiq checks no longer match their own probe. Both ran `pgrep -f <name>` inside a container shell whose command line contained that name, so pgrep matched itself and the check passed whether or not the service was actually running. Sidekiq had reported "running" unconditionally since 1.0.0, and the web server check since 1.0.1 — the same root cause as the Puma false positive, which was renamed rather than fixed. Patterns now bracket their first character (`[u]nicorn`, `[s]idekiq`) and the probes no longer echo the service name, so only real processes match.
+- Worker count no longer prints a stray extra line. `pgrep -c` prints `0` *and* exits non-zero when nothing matches, so the old `|| echo 0` fallback emitted two values, which also defeated the numeric validation.
 - Web server check now detects Pitchfork as well as Unicorn. Discourse made Pitchfork the default in 2026.2 and removed Unicorn entirely in 2026.4. Pitchfork is matched first, since `config/unicorn_launcher` was kept for the Docker images and can still match a bare "unicorn" pattern on a Pitchfork install.
 
 ### Added

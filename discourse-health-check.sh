@@ -282,16 +282,26 @@ if container_running; then
     # Docker images, so a bare "unicorn" match can still hit the launcher on
     # a Pitchfork install — check Pitchfork first, and verify worker count.
     #
-    # Patterns bracket their first character ("[p]itchfork") so pgrep cannot
-    # match the command line of its own `docker exec sh -c` wrapper, which
-    # would otherwise report the server as running no matter what.
-    web_proc=$(in_container "pgrep -f '[p]itchfork' >/dev/null && echo pitchfork || { pgrep -f '[u]nicorn' >/dev/null && echo unicorn; }" | tr -d '\r')
+    # in_container passes the whole command string as argv to a bash process
+    # inside the container, and pgrep -f matches against argv. So the probes
+    # bracket their first character ("[p]itchfork") AND never mention the
+    # server name anywhere else in the string — otherwise pgrep matches those
+    # literals and reports the server up no matter what is really running.
+    web_proc=""
+    if [[ "$(in_container "pgrep -f '[p]itchfork' >/dev/null && echo yes")" == "yes" ]]; then
+        web_proc="pitchfork"
+    elif [[ "$(in_container "pgrep -f '[u]nicorn' >/dev/null && echo yes")" == "yes" ]]; then
+        web_proc="unicorn"
+    fi
     if [[ -n "$web_proc" ]]; then
         ok "Web server (${web_proc}) is running"
+        # pgrep -c prints "0" and exits 1 when nothing matches, so `|| echo 0`
+        # would emit two lines. Swallow the status instead and validate.
         web_pat="[${web_proc:0:1}]${web_proc:1}"
-        workers=$(in_container "pgrep -c -f '${web_pat} worker' || echo 0" | tr -d '\r')
+        workers=$(in_container "pgrep -c -f '${web_pat} worker' 2>/dev/null || true" | tr -d '\r\n')
+        [[ "$workers" =~ ^[0-9]+$ ]] || workers=0
         info "${web_proc} workers: ${workers}"
-        if [[ "$workers" =~ ^[0-9]+$ ]] && (( workers == 0 )); then
+        if (( workers == 0 )); then
             crit "${web_proc} is up but no workers are running"
         fi
     else
@@ -299,7 +309,9 @@ if container_running; then
     fi
 
     # ── Sidekiq (background jobs) ────────────────────────
-    if [[ "$(in_container 'pgrep -f sidekiq >/dev/null && echo ok')" == "ok" ]]; then
+    # Bracketed pattern, as above — a bare "sidekiq" would match the argv of
+    # the very bash process running this probe.
+    if [[ "$(in_container "pgrep -f '[s]idekiq' >/dev/null && echo yes")" == "yes" ]]; then
         ok "Sidekiq is running"
         enqueued=$(in_container "redis-cli llen queue:default" | tr -d '\r' || echo "?")
         retries=$(in_container "redis-cli zcard retry" | tr -d '\r' || echo "?")
