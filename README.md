@@ -9,6 +9,10 @@ basics — with a pass / warning / critical summary at the bottom.
 No agents, no daemons, no dependencies beyond what's already on a typical
 Discourse host.
 
+Discussion, questions, and suggestions:
+[Discourse-health-check: one-shot CLI overview of your Discourse server](https://meta.discourse.org/t/discourse-health-check-one-shot-cli-overview-of-your-discourse-server/404458)
+on Discourse Meta.
+
 ![Sample output](docs/screenshot.png)
 
 Text example (showing a run that flags elevated SSH brute-force attempts):
@@ -178,6 +182,10 @@ Useful in cron — pipe the output to a log and alert only on non-zero exit:
 Issues and pull requests welcome. If a check is wrong or missing for your
 distro / setup, please open an issue with the relevant output so it can be
 fixed for everyone.
+
+For general discussion, questions, and feature suggestions, use the
+[topic on Discourse Meta](https://meta.discourse.org/t/discourse-health-check-one-shot-cli-overview-of-your-discourse-server/404458)
+rather than an issue.
 
 ## License
 
