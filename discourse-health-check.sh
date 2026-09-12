@@ -297,8 +297,14 @@ if container_running; then
         ok "Web server (${web_proc}) is running"
         # pgrep -c prints "0" and exits 1 when nothing matches, so `|| echo 0`
         # would emit two lines. Swallow the status instead and validate.
+        #
+        # Unicorn titles workers "unicorn worker[0]", but Pitchfork inserts a
+        # generation counter: "pitchfork (gen:0) worker[0]". Match ".*worker["
+        # so both forms count. The trailing bracket keeps the mold, monitor
+        # and service processes out of the total — only numbered workers are
+        # bracketed.
         web_pat="[${web_proc:0:1}]${web_proc:1}"
-        workers=$(in_container "pgrep -c -f '${web_pat} worker' 2>/dev/null || true" | tr -d '\r\n')
+        workers=$(in_container "pgrep -c -f '${web_pat}.*worker\[' 2>/dev/null || true" | tr -d '\r\n')
         [[ "$workers" =~ ^[0-9]+$ ]] || workers=0
         info "${web_proc} workers: ${workers}"
         if (( workers == 0 )); then

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2026-09-12
+
+### Fixed
+- Pitchfork worker count no longer reports zero on a healthy server. 1.0.4 added the worker-count check using Unicorn's process title format, where the workers are named `unicorn worker[0]`. Pitchfork inserts a generation counter — `pitchfork (gen:0) worker[0]` — so the adjacent-word pattern never matched and every Pitchfork install was reported as "up but no workers are running", a critical, while serving traffic normally. The pattern now allows for the generation prefix and anchors on the bracketed worker number, which also keeps the mold, monitor and service processes out of the count.
+
 ## [1.0.4] - 2026-07-29
 
 ### Fixed
